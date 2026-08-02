@@ -1,0 +1,77 @@
+# ===========================
+# Terraform
+# ===========================
+
+# Terraform working directory
+**/.terraform/*
+
+# Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Terraform plan files
+*.tfplan
+*.plan
+
+# Variable files containing secrets
+*.tfvars
+*.tfvars.json
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform dependency lock
+# Keep this file if working in a team.
+# Ignore it only if you have a specific reason.
+#! .terraform.lock.hcl
+
+# CLI configuration
+.terraformrc
+terraform.rc
+
+# ===========================
+# Sensitive files
+# ===========================
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Environment files
+.env
+.env.*
+
+# ===========================
+# Editor
+# ===========================
+
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Linux
+*~
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Python cache (if scripts are added later)
+__pycache__/
+*.pyc
