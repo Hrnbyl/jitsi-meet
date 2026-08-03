@@ -1,25 +1,26 @@
-# ===========================
+# ==========================================
 # Terraform
-# ===========================
+# ==========================================
 
 # Terraform working directory
-**/.terraform/*
+.terraform/
 
 # Terraform state files
 *.tfstate
 *.tfstate.*
-
-# Crash logs
-crash.log
-crash.*.log
+*.tfstate.backup
 
 # Terraform plan files
 *.tfplan
 *.plan
 
-# Variable files containing secrets
-*.tfvars
-*.tfvars.json
+# Crash logs
+crash.log
+crash.*.log
+*.log
+
+# Terraform lock info
+.terraform.tfstate.lock.info
 
 # Override files
 override.tf
@@ -27,51 +28,57 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 
-# Terraform dependency lock
-# Keep this file if working in a team.
-# Ignore it only if you have a specific reason.
-#! .terraform.lock.hcl
+# Variable files (often contain secrets)
+*.tfvars
+*.tfvars.json
 
-# CLI configuration
+# Terraform CLI configuration
 .terraformrc
 terraform.rc
 
-# ===========================
-# Sensitive files
-# ===========================
+# ==========================================
+# Environment & Secrets
+# ==========================================
 
-*.pem
-*.key
-*.p12
-*.pfx
-*.crt
-*.cer
-
-# Environment files
 .env
 .env.*
+.env.local
 
-# ===========================
-# Editor
-# ===========================
+# Certificates & Private Keys
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# Local credential files
+aws-credentials.json
+
+# IAM policy files generated/downloaded locally
+iam_policy.json
+missing-alb-policy.json
+fix-listener-policy.json
+
+# ==========================================
+# Editor Files
+# ==========================================
 
 .vscode/
 .idea/
 
-# macOS
+# ==========================================
+# OS Files
+# ==========================================
+
 .DS_Store
-
-# Linux
-*~
-
-# Windows
 Thumbs.db
 Desktop.ini
+*~
 
-# Logs
-*.log
-logs/
+# ==========================================
+# Python (if helper scripts are added)
+# ==========================================
 
-# Python cache (if scripts are added later)
 __pycache__/
 *.pyc
