@@ -1,28 +1,4 @@
 # =========================================================
-# 1. Network Load Balancer (NLB) for JVB (UDP Port 10000)
-# =========================================================
-apiVersion: v1
-kind: Service
-metadata:
-  name: jitsi-jvb-nlb
-  namespace: jitsi
-  annotations:
-    service.k8s.aws/type: "nlb"
-    service.k8s.aws/nlb-target-type: "ip"
-    service.k8s.aws/scheme: "internet-facing"
-spec:
-  type: LoadBalancer
-  selector:
-    app.kubernetes.io/name: jitsi-meet
-    app.kubernetes.io/component: jvb
-  ports:
-    - name: jvb-udp
-      port: 10000
-      targetPort: 10000
-      protocol: UDP
-
----
-# =========================================================
 # 2. Application Load Balancer (ALB) for Web UI & WebSockets
 # =========================================================
 apiVersion: networking.k8s.io/v1
@@ -33,11 +9,17 @@ metadata:
   annotations:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    # Listen on both HTTP (80) and HTTPS (443)
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    # Force redirect all HTTP traffic to secure HTTPS
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # Your official AWS ACM Certificate ARN
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:444455570206:certificate/4ec194f1-f597-4fde-bc33-04f84959a2a3
 spec:
   ingressClassName: alb
   rules:
-    - http:
+    - host: hrnbyl.rahulbastia.tech
+      http:
         paths:
           - path: /
             pathType: Prefix
