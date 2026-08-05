@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jitsi-jicofo
+  namespace: jitsi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jitsi-jicofo
+  template:
+    metadata:
+      labels:
+        app: jitsi-jicofo
+    spec:
+      containers:
+        - name: jicofo
+          image: {{ .Values.images.jicofo }}
+          env:
+            - name: XMPP_SERVER
+              value: "jitsi-prosody"

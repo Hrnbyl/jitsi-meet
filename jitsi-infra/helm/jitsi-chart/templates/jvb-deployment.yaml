@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jitsi-jvb
+  namespace: jitsi
+spec:
+  replicas: 2 # Start with 2 instances for scaling
+  selector:
+    matchLabels:
+      app: jitsi-jvb
+  template:
+    metadata:
+      labels:
+        app: jitsi-jvb
+    spec:
+      containers:
+        - name: jvb
+          image: {{ .Values.images.jvb }}
+          ports:
+            - containerPort: {{ .Values.networking.jvbUdpPort }}
+              protocol: UDP
+          env:
+            - name: XMPP_SERVER
+              value: "jitsi-prosody"
+            - name: DOCKER_HOST_ADDRESS
+              value: {{ .Values.domain }}

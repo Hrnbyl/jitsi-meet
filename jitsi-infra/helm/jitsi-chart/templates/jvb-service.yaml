@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jitsi-jvb
+  namespace: jitsi
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  type: LoadBalancer
+  selector:
+    app: jitsi-jvb
+  ports:
+    - name: media-udp
+      port: {{ .Values.networking.jvbUdpPort }}
+      targetPort: {{ .Values.networking.jvbUdpPort }}
+      protocol: UDP

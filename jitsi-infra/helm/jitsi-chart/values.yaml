@@ -1,0 +1,11 @@
+domain: hrnbyl.rahulbastia.tech
+certificateArn: "ADD_ARN"
+
+networking:
+  jvbUdpPort: 10000
+
+images:
+  web: jitsi/web:latest
+  prosody: jitsi/prosody:latest
+  jicofo: jitsi/jicofo:latest
+  jvb: jitsi/jvb:latest

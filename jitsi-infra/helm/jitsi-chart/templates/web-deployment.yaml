@@ -1,0 +1,41 @@
+# The Internal Service (Allows the Ingress ALB to find the Web Pods)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jitsi-meet-web
+  namespace: jitsi
+spec:
+  type: ClusterIP
+  selector:
+    app: jitsi-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+---
+# The Deployment (Tells Kubernetes to run the Docker Container)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jitsi-web
+  namespace: jitsi
+spec:
+  replicas: 1 # Number of pods to run
+  selector:
+    matchLabels:
+      app: jitsi-web
+  template:
+    metadata:
+      labels:
+        app: jitsi-web
+    spec:
+      containers:
+        - name: web
+          image: {{ .Values.images.web }}
+          ports:
+            - containerPort: 80
+          # We will inject environment variables here later
+          env:
+            - name: PUBLIC_URL
+              value: "https://{{ .Values.domain }}"
