@@ -1,12 +1,11 @@
-# =========================================================
-# 2. Application Load Balancer (ALB) for Web UI & WebSockets
-# =========================================================
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: jitsi-ingress
   namespace: jitsi
   annotations:
+    # AUTOMATION MAGIC: This line tells ExternalDNS to map Route 53
+    external-dns.alpha.kubernetes.io/hostname: hrnbyl.rahulbastia.tech
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     # Listen on both HTTP (80) and HTTPS (443)
