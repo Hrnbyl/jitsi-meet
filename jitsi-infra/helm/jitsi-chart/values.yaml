@@ -1,11 +1,21 @@
 domain: hrnbyl.rahulbastia.tech
-certificateArn: "ADD_ARN"
+certificateArn: "arn:aws:acm:ap-south-1:444455570206:certificate/4ec194f1-f597-4fde-bc33-04f84959a2a3"
 
 networking:
   jvbUdpPort: 10000
 
 images:
-  web: jitsi/web:latest
-  prosody: jitsi/prosody:latest
-  jicofo: jitsi/jicofo:latest
-  jvb: jitsi/jvb:latest
+  web: jitsi/web:stable
+  prosody: jitsi/prosody:stable
+  jicofo: jitsi/jicofo:stable
+  jvb: jitsi/jvb:stable
+
+jitsiSecrets:
+  jicofoComponentSecret: "JicofoSecret123!"
+  jicofoAuthPassword: "JicofoAuthPassword123!"
+  jvbAuthPassword: "JvbAuthPassword123!"
+
+xmpp:
+  authDomain: "auth.meet.jitsi"
+  mucDomain: "muc.meet.jitsi"
+  internalMucDomain: "internal-muc.meet.jitsi"

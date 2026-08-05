@@ -39,3 +39,15 @@ spec:
           env:
             - name: PUBLIC_URL
               value: "https://{{ .Values.domain }}"
+            - name: XMPP_SERVER
+              value: "jitsi-prosody"
+            - name: XMPP_DOMAIN
+              value: {{ .Values.domain }}
+            - name: XMPP_AUTH_DOMAIN
+              value: {{ .Values.xmpp.authDomain }}
+            - name: XMPP_MUC_DOMAIN
+              value: {{ .Values.xmpp.mucDomain }}
+            - name: XMPP_INTERNAL_MUC_DOMAIN
+              value: {{ .Values.xmpp.internalMucDomain }}
+            - name: XMPP_BOSH_URL_BASE
+              value: "http://jitsi-prosody:5222"

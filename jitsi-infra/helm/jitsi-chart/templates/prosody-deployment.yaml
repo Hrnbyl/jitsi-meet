@@ -39,3 +39,15 @@ spec:
           env:
             - name: XMPP_DOMAIN
               value: {{ .Values.domain }}
+            - name: XMPP_AUTH_DOMAIN
+              value: {{ .Values.xmpp.authDomain }}
+            - name: XMPP_MUC_DOMAIN
+              value: {{ .Values.xmpp.mucDomain }}
+            - name: XMPP_INTERNAL_MUC_DOMAIN
+              value: {{ .Values.xmpp.internalMucDomain }}
+            - name: JICOFO_COMPONENT_SECRET
+              value: {{ .Values.jitsiSecrets.jicofoComponentSecret }}
+            - name: JICOFO_AUTH_PASSWORD
+              value: {{ .Values.jitsiSecrets.jicofoAuthPassword }}
+            - name: JVB_AUTH_PASSWORD
+              value: {{ .Values.jitsiSecrets.jvbAuthPassword }}
