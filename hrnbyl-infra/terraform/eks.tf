@@ -9,8 +9,8 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = "1.30"
 
-  enable_cluster_creator_admin_permissions = true
-  cluster_endpoint_public_access           = true
+  enable_cluster_creator_admin_permissions = true # In production often disabled or restricted to specific IAM role for improved security.
+  cluster_endpoint_public_access           = true # In production often disabled or restricted to specific IP addresses for improved security.
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
