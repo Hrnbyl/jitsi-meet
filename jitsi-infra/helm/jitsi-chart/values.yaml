@@ -16,6 +16,6 @@ jitsiSecrets:
   jvbAuthPassword: "JvbAuthPassword123!"
 
 xmpp:
-  authDomain: "auth.meet.jitsi"
-  mucDomain: "muc.meet.jitsi"
-  internalMucDomain: "internal-muc.meet.jitsi"
+  authDomain: "auth.hrnbyl.rahulbastia.tech"
+  mucDomain: "muc.hrnbyl.rahulbastia.tech"
+  internalMucDomain: "internal-muc.hrnbyl.rahulbastia.tech"

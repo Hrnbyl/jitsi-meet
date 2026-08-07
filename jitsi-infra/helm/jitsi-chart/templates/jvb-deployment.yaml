@@ -20,6 +20,8 @@ spec:
             - containerPort: {{ .Values.networking.jvbUdpPort }}
               protocol: UDP
           env:
+            - name: XMPP_SERVER
+              value: "jitsi-prosody.jitsi.svc.cluster.local"
             - name: XMPP_DOMAIN
               value: {{ .Values.domain }}
             - name: XMPP_AUTH_DOMAIN
