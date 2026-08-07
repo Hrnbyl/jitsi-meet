@@ -1,7 +1,5 @@
-# ==============================================================================
-# AMAZON EKS MODULE
 # Purpose: Deploys a managed Kubernetes cluster control plane and worker nodes.
-# ==============================================================================
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
@@ -17,12 +15,12 @@ module "eks" {
 
   eks_managed_node_groups = {
     jitsi_nodes = {
-      min_size     = 2
-      max_size     = 4
-      desired_size = 4
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
 
       ami_type       = "AL2_x86_64"
-      instance_types = ["t3.micro"]
+      instance_types = ["t3.small"]
       capacity_type  = "ON_DEMAND"
 
       labels = {

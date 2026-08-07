@@ -40,7 +40,7 @@ spec:
             - name: PUBLIC_URL
               value: "https://{{ .Values.domain }}"
             - name: XMPP_SERVER
-              value: "jitsi-prosody"
+              value: "jitsi-prosody.jitsi.svc.cluster.local"
             - name: XMPP_DOMAIN
               value: {{ .Values.domain }}
             - name: XMPP_AUTH_DOMAIN
@@ -50,4 +50,6 @@ spec:
             - name: XMPP_INTERNAL_MUC_DOMAIN
               value: {{ .Values.xmpp.internalMucDomain }}
             - name: XMPP_BOSH_URL_BASE
-              value: "http://jitsi-prosody:5222"
+              value: "http://jitsi-prosody.jitsi.svc.cluster.local:5280"
+            - name: ENABLE_XMPP_WEBSOCKET
+              value: "1"

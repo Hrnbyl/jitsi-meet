@@ -14,6 +14,9 @@ spec:
     - name: xmpp-component
       port: 5347
       targetPort: 5347
+    - name: http
+      port: 5280
+      targetPort: 5280
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -36,6 +39,7 @@ spec:
           ports:
             - containerPort: 5222
             - containerPort: 5347
+            - containerPort: 5280
           env:
             - name: XMPP_DOMAIN
               value: {{ .Values.domain }}
@@ -51,3 +55,7 @@ spec:
               value: {{ .Values.jitsiSecrets.jicofoAuthPassword }}
             - name: JVB_AUTH_PASSWORD
               value: {{ .Values.jitsiSecrets.jvbAuthPassword }}
+            - name: PUBLIC_URL
+              value: "https://{{ .Values.domain }}"
+            - name: ENABLE_XMPP_WEBSOCKET
+              value: "1"
