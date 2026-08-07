@@ -93,3 +93,69 @@ The console confirms:
 * The video meeting stabilizes with no further disconnections.
 
 The Jitsi Meet infrastructure is now stable, optimized for cost on AWS Free Tier, and fully operational.
+
+
+## 7. Issue #5: Unclickable "Join Meeting" Button (JVB & Jicofo Connection Failures)
+
+**Symptom:**
+Users could load the Jitsi frontend, but the "Join meeting" button remained greyed out and unclickable on the pre-join screen.
+
+**Diagnostic Approach:**
+When the frontend loads but a meeting cannot be initiated, it indicates a failure in the backend components (Jicofo for room allocation, JVB for video bridging).
+
+1. Executed `kubectl logs deploy/jitsi-jicofo -n jitsi --tail=50` to check the Focus Manager.
+2. Executed `kubectl logs deploy/jitsi-jvb -n jitsi --tail=50` to check the Videobridge.
+
+**Root Cause:**
+Both backend components were failing to register with the Prosody XMPP server due to missing or incorrect environment variables:
+
+* **JVB:** The `XMPP_SERVER` environment variable was entirely missing from `jvb-deployment.yaml`. The system defaulted to a non-existent DNS record (`xmpp.meet.jitsi`), throwing an `UnknownHostException`.
+* **Jicofo:** The deployment was using the short DNS name (`jitsi-prosody`) instead of the Kubernetes FQDN, and it was missing the `XMPP_MUC_DOMAIN` variable, causing it to attempt room creation on the external domain rather than the internal network.
+
+**Final Resolution:**
+
+1. Updated `jvb-deployment.yaml` to explicitly include `XMPP_SERVER` pointing to the internal FQDN (`jitsi-prosody.jitsi.svc.cluster.local`).
+2. Updated `jicofo-deployment.yaml` to use the FQDN and injected the missing `XMPP_MUC_DOMAIN` variable.
+3. Restarted both deployments via `kubectl rollout restart` to force fresh connections.
+
+---
+
+## 8. Issue #6: WebSocket `<host-unknown>` Error & Domain Mismatch
+
+**Symptom:**
+After fixing the backend connections, the UI attempted to connect but immediately fell into a "Disconnected - Reconnecting" loop. Inspecting the browser's Network tab for the WebSocket connection revealed an XMPP stream error: `<stream:error><host-unknown.../></stream:error>`. Concurrently, Prosody logs showed it returning an `<iq type='error'>` stating: `Communication with remote domains is not enabled`.
+
+**Diagnostic Approach:**
+
+1. Checked Prosody logs for exact stanza rejections.
+2. Verified the active environment variables injected into the running containers using `kubectl exec deploy/jitsi-web -n jitsi -- env | grep -i XMPP`.
+3. Inspected the global Helm chart `values.yaml`.
+
+**Root Cause (The "Split Personality" Configuration):**
+The infrastructure suffered from a domain mismatch between the public frontend and the internal backend components.
+
+* The web client sent an XMPP handshake requesting the public domain (`hrnbyl.rahulbastia.tech`).
+* However, the `values.yaml` file left the internal XMPP variables (`authDomain`, `mucDomain`) set to the default placeholder (`meet.jitsi`).
+* When Jicofo requested room creation for the public domain, Prosody—which was only listening for the internal `meet.jitsi` domain—treated the request as an unauthorized external server-to-server connection and blocked it.
+
+**Final Resolution:**
+
+1. **Unified Global Variables:** Edited the `values.yaml` file to explicitly map all internal XMPP domains to the active public domain:
+* `authDomain: "auth.hrnbyl.rahulbastia.tech"`
+* `mucDomain: "muc.hrnbyl.rahulbastia.tech"`
+* `internalMucDomain: "internal-muc.hrnbyl.rahulbastia.tech"`
+
+
+2. **Cluster-Wide Restart:** Because Prosody must generate new internal VirtualHosts based on these domains, the Helm chart was upgraded, and a sequential rollout restart was performed on all four primary components (`prosody`, `jicofo`, `jvb`, `web`).
+
+---
+
+## 9. Final Verification & Sign-off
+
+Following the cluster-wide domain synchronization, the Jitsi Meet architecture stabilized completely.
+
+**Success Metrics Achieved:**
+
+* **Infrastructure:** EKS nodes running efficiently within AWS Free Tier limits (using `t3.small` nodes).
+* **Networking:** WebSockets reliably maintain stateful connections without `502` or `<host-unknown>` drops.
+* **Application:** Multi-user sessions are successfully brokered by Jicofo and handled by JVB. As evidenced by final testing (reference: `image_0419b7.png`), multiple distinct user profiles can join the same room with stable audio/video transmission and active moderator controls. The deployment is considered fully functional and production-ready.
