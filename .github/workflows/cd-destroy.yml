@@ -1,0 +1,41 @@
+name: CD - Destroy AWS Infrastructure
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  destroy-eks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Update Kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ap-south-1 --name jitsi-eks-cluster || true
+
+      - name: Delete Kubernetes Resources & Load Balancers
+        run: |
+          helm uninstall jitsi-release -n jitsi || true
+          kubectl delete ingress --all -n jitsi || true
+          kubectl delete svc --all -n jitsi || true
+          helm uninstall aws-load-balancer-controller -n kube-system || true
+
+      - name: Wait for AWS Dynamic Load Balancers Teardown
+        run: sleep 120
+
+      - name: Terraform Destroy
+        run: |
+          cd jitsi-infra/terraform
+          terraform init
+          terraform destroy -auto-approve
