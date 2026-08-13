@@ -1,12 +1,11 @@
 name: CD - Deploy to AWS EKS
 
 on:
-  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+  workflow_dispatch: 
   push:
     branches: [ master ]
     paths:
-      - 'jitsi-infra/**' # Triggers automatically when infrastructure code changes
-
+      - 'jitsi-infra/**' 
 jobs:
   deploy-eks:
     runs-on: ubuntu-latest
