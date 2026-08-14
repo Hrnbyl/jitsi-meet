@@ -1,5 +1,5 @@
 domain: meet.hrnbyl.com
-certificateArn: "arn:aws:acm:ap-south-1:014382217490:certificate/f0f5ee64-d847-4f6b-adca-ec4e8dd38b4a"
+certificateArn: "arn:aws:acm:ap-south-1:100390193083:certificate/93f98744-29a4-407b-87eb-0fad95085f39"
 
 networking:
   jvbUdpPort: 10000

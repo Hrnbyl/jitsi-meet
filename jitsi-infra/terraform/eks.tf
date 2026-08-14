@@ -1,5 +1,3 @@
-# Purpose: Deploys a managed Kubernetes cluster control plane and worker nodes.
-
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
@@ -7,8 +5,11 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = "1.30"
 
-  enable_cluster_creator_admin_permissions = true # In production often disabled or restricted to specific IAM role for improved security.
-  cluster_endpoint_public_access           = true # In production often disabled or restricted to specific IP addresses for improved security.
+  enable_cluster_creator_admin_permissions = true
+  cluster_endpoint_public_access           = true
+  create_cloudwatch_log_group              = false
+  create_kms_key                           = false
+  cluster_encryption_config                = {}
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
