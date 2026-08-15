@@ -89,6 +89,50 @@ The platform runs four containerized microservices inside an Amazon EKS cluster,
 ## 2. Architecture at a Glance
 ![High-Level Jitsi DevOps Architecture](./resources/high-level.png)
 
+```mermaid
+flowchart TB
+    USER["👤 End User Browser"]
+
+    subgraph DNS_LAYER["DNS Resolution"]
+        DNS["yourdomain.com"]
+    end
+
+    subgraph AWS["AWS Cloud — ap-south-1"]
+        direction TB
+
+        subgraph LB_LAYER["Load Balancers (Public Subnets)"]
+            ALB["Application Load Balancer<br/>HTTPS :443"]
+            NLB["Network Load Balancer<br/>UDP :10000"]
+        end
+
+        subgraph EKS["Amazon EKS Cluster (Private Subnets)"]
+            direction TB
+            WEB["jitsi-web<br/>(Nginx + React UI)"]
+            PROSODY["Prosody<br/>(XMPP Server)"]
+            JICOFO["Jicofo<br/>(Conference Focus)"]
+            JVB["JVB<br/>(Videobridge / SFU)"]
+        end
+
+        subgraph OPS["Operations"]
+            ARGO["Argo CD<br/>(GitOps Sync)"]
+            GRAFANA["Grafana<br/>(Dashboards)"]
+        end
+    end
+
+    subgraph GIT["GitHub Repository"]
+        REPO["Helm Chart +<br/>Terraform Config"]
+    end
+
+    USER --> DNS --> ALB
+    USER -.->|WebRTC Media| NLB
+    ALB --> WEB
+    NLB --> JVB
+    WEB <--> PROSODY
+    JICOFO <--> PROSODY
+    JVB <--> PROSODY
+    REPO --> ARGO --> EKS
+    EKS -.-> GRAFANA
+```
 
 The system separates web/signaling traffic (Layer 7 via ALB) from real-time media traffic (Layer 4 via NLB). All Jitsi components run as Kubernetes Deployments inside private subnets, communicating internally over XMPP through the Prosody message bus.
 
@@ -121,7 +165,40 @@ The VPC is provisioned using the `terraform-aws-modules/vpc/aws` module (v5.19.x
 # Private subnets — internal load balancer placement
 "kubernetes.io/role/internal-elb" = "1"
 ```
-![AWS VPC & Network Architecture](./resources/AWS%20VPC%20&%20Network%20Architecture.png)
+<!-- ![AWS VPC & Network Architecture](./resources/AWS%20VPC%20&%20Network%20Architecture.png) -->
+
+```mermaid
+flowchart TB
+    INET["Internet"]
+
+    subgraph VPC["VPC: jitsi-production-vpc (10.0.0.0/16)"]
+        direction TB
+        IGW["Internet Gateway"]
+
+        subgraph PUB["Public Subnets"]
+            direction LR
+            PUB_A["10.0.101.0/24<br/>ap-south-1a"]
+            PUB_B["10.0.102.0/24<br/>ap-south-1b"]
+            PUB_C["10.0.103.0/24<br/>ap-south-1c"]
+            NAT["NAT Gateway"]
+            ALB2["ALB"]
+            NLB2["NLB"]
+        end
+
+        subgraph PRIV["Private Subnets"]
+            direction LR
+            PRIV_A["10.0.1.0/24<br/>ap-south-1a"]
+            PRIV_B["10.0.2.0/24<br/>ap-south-1b"]
+            PRIV_C["10.0.3.0/24<br/>ap-south-1c"]
+            EKS_NODES["EKS Worker Nodes"]
+        end
+    end
+
+    INET <--> IGW <--> PUB
+    PUB --> NAT --> PRIV
+    ALB2 --> EKS_NODES
+    NLB2 --> EKS_NODES
+```
 
 ### 3.2 Amazon EKS Cluster
 
@@ -187,7 +264,41 @@ Installed via the `eks/aws-load-balancer-controller` Helm chart in `kube-system`
 
 ### 4.3 Services & Ingress
 
-![Kubernetes & Jitsi Workload Architecture](./resources/Kubernetes%20&%20Jitsi%20Workload%20Architecture.png)
+<!-- ![Kubernetes & Jitsi Workload Architecture](./resources/Kubernetes%20&%20Jitsi%20Workload%20Architecture.png) -->
+
+```mermaid
+flowchart TB
+    subgraph EXTERNAL["External Traffic"]
+        CLIENT_HTTPS["HTTPS :443"]
+        CLIENT_UDP["UDP :10000"]
+    end
+
+    subgraph K8S["Kubernetes Cluster — Namespace: jitsi"]
+        direction TB
+
+        ING["Ingress: jitsi-ingress<br/>(ALB, internet-facing)"]
+
+        subgraph SERVICES["Services"]
+            SVC_WEB["jitsi-meet-web<br/>ClusterIP :80"]
+            SVC_PROSODY["jitsi-prosody<br/>ClusterIP :5222, :5347, :5280"]
+            SVC_JVB["jitsi-jvb<br/>LoadBalancer :10000/UDP"]
+        end
+
+        subgraph DEPLOYMENTS["Deployments"]
+            DEP_WEB["jitsi-web<br/>1 replica"]
+            DEP_PROSODY["jitsi-prosody<br/>1 replica"]
+            DEP_JICOFO["jitsi-jicofo<br/>1 replica"]
+            DEP_JVB["jitsi-jvb<br/>2 replicas"]
+        end
+    end
+
+    CLIENT_HTTPS --> ING --> SVC_WEB --> DEP_WEB
+    CLIENT_UDP --> SVC_JVB --> DEP_JVB
+    DEP_WEB --> SVC_PROSODY
+    DEP_JICOFO --> SVC_PROSODY
+    DEP_JVB --> SVC_PROSODY
+    SVC_PROSODY --> DEP_PROSODY
+```
 
 **Kubernetes Resource Inventory:**
 
@@ -242,7 +353,27 @@ A critical aspect of this deployment is the **unified XMPP domain mapping**. All
 
 All internal service-to-service communication uses **Kubernetes Fully Qualified Domain Names (FQDNs)** to avoid DNS resolution failures in lightweight containers:
 
-![Jitsi Component Communication Architecture](./resources/Kubernetes%20&%20Jitsi%20Workload%20Architecture.png)
+<!-- ![Jitsi Component Communication Architecture](./resources/Kubernetes%20&%20Jitsi%20Workload%20Architecture.png) -->
+
+```mermaid
+flowchart LR
+    subgraph JITSI["Jitsi Namespace"]
+        direction TB
+
+        WEB["jitsi-web<br/>(Nginx)"]
+        PROSODY["Prosody<br/>(XMPP Hub)"]
+        JICOFO["Jicofo<br/>(Focus Manager)"]
+        JVB1["JVB Pod 1"]
+        JVB2["JVB Pod 2"]
+    end
+
+    WEB -->|"HTTP/WS Proxy<br/>:5280 (BOSH)"| PROSODY
+    JICOFO -->|"Component<br/>:5347"| PROSODY
+    JVB1 -->|"Client XMPP<br/>:5222"| PROSODY
+    JVB2 -->|"Client XMPP<br/>:5222"| PROSODY
+    JICOFO -.->|"Allocate Bridge"| JVB1
+    JICOFO -.->|"Allocate Bridge"| JVB2
+```
 
 **Key environment variables injected into all deployments:**
 
