@@ -19,3 +19,10 @@ xmpp:
   authDomain: "auth.meet.hrnbyl.com"
   mucDomain: "muc.meet.hrnbyl.com"
   internalMucDomain: "internal-muc.meet.hrnbyl.com"
+
+metrics:
+  prometheus:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      namespace: monitoring
