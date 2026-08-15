@@ -87,7 +87,7 @@ The platform runs four containerized microservices inside an Amazon EKS cluster,
 ---
 
 ## 2. Architecture at a Glance
-![High-Level Jitsi DevOps Architecture](./resources/high-level.png)
+
 
 ```mermaid
 flowchart TB
@@ -165,7 +165,6 @@ The VPC is provisioned using the `terraform-aws-modules/vpc/aws` module (v5.19.x
 # Private subnets — internal load balancer placement
 "kubernetes.io/role/internal-elb" = "1"
 ```
-<!-- ![AWS VPC & Network Architecture](./resources/AWS%20VPC%20&%20Network%20Architecture.png) -->
 
 ```mermaid
 flowchart TB
@@ -264,7 +263,7 @@ Installed via the `eks/aws-load-balancer-controller` Helm chart in `kube-system`
 
 ### 4.3 Services & Ingress
 
-<!-- ![Kubernetes & Jitsi Workload Architecture](./resources/Kubernetes%20&%20Jitsi%20Workload%20Architecture.png) -->
+
 
 ```mermaid
 flowchart TB
@@ -353,7 +352,7 @@ A critical aspect of this deployment is the **unified XMPP domain mapping**. All
 
 All internal service-to-service communication uses **Kubernetes Fully Qualified Domain Names (FQDNs)** to avoid DNS resolution failures in lightweight containers:
 
-<!-- ![Jitsi Component Communication Architecture](./resources/Kubernetes%20&%20Jitsi%20Workload%20Architecture.png) -->
+
 
 ```mermaid
 flowchart LR
